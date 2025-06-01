@@ -1,29 +1,97 @@
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+"use client";
 
-type SharedButtonButtonProps = {
+import React from "react";
+import {
+  ArrowRight,
+  Gamepad2,
+  Heart,
+  ShoppingCart,
+  Star,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+
+type SharedButtonProps = {
   onClick?: () => void;
   className?: string;
-  label?: string;
-  showIcon?: boolean;  // خاصية جديدة لتحديد ظهور الأيقونة
+  label?: React.ReactNode;
+  icon?: React.ReactNode;
+  iconType?: "arrow" | "heart" | "star" | "game" | "cart";
+  iconPosition?: "left" | "right";
+  showIcon?: boolean;
+  variant?: "default" | "secondary" | "outline" | "ghost" | "link" | "destructive";
+  size?: "default" | "sm" | "lg" | "icon";
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
+  isActive?: boolean;
+  children?: React.ReactNode;
 };
 
-export default function SharedButton({
-  onClick,
-  className = "cursor-pointer",
-  label = "Show More",
-  showIcon = true,
-}: SharedButtonButtonProps) {
+const getIcon = (type: string = "arrow", isActive: boolean = false) => {
+  switch (type) {
+    case "arrow":
+      return <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />;
+    case "heart":
+      return <Heart className={`w-4 h-4 ${isActive ? "fill-current" : ""}`} />;
+    case "star":
+      return <Star className="w-4 h-4" />;
+    case "game":
+      return <Gamepad2 className="w-4 h-4" />;
+    case "cart":
+      return <ShoppingCart className="w-4 h-4" />;
+    default:
+      return null;
+  }
+};
+
+export default function SharedButton(props: SharedButtonProps) {
+  const {
+    onClick,
+    className,
+    label = "Show More",
+    icon,
+    iconType = "arrow",
+    iconPosition = "right",
+    showIcon = true,
+    variant = "default",
+    size = "default",
+    type = "button",
+    disabled = false,
+    isActive = false,
+   
+    children,
+  } = props;
+
+  const finalIcon = icon || getIcon(iconType, isActive);
+
   return (
-    <Button
+    <button
+      type={type}
       onClick={onClick}
-      className={`flex-1 gap-2 text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 ${className}`}
-      size="lg"
-    >
-      {label}
-      {showIcon && (
-        <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+      disabled={disabled}
+    
+      className={cn(
+        buttonVariants({ variant, size }),
+        "group relative overflow-hidden font-semibold rounded-xl shadow-md transition-all",
+        "hover:shadow-xl hover:-translate-y-[1px]",
+        disabled && "opacity-50 cursor-not-allowed",
+        isActive && "bg-primary/20 text-primary",
+        className
       )}
-    </Button>
+    >
+      <span className="absolute inset-0 z-0 scale-x-0 origin-left bg-neutral-900 dark:bg-neutral-200 transition-transform group-hover:scale-x-100 rounded-xl" />
+
+      <span className="relative z-10 flex items-center justify-center gap-2 text-black dark:text-white group-hover:text-white dark:group-hover:text-black">
+        {children ? (
+          children
+        ) : (
+          <>
+            {showIcon && iconPosition === "left" && finalIcon}
+            {label}
+            {showIcon && iconPosition === "right" && finalIcon}
+          </>
+        )}
+      </span>
+    </button>
   );
 }
